@@ -1,0 +1,149 @@
+# Default values for qBittorrent
+# This is a YAML-formatted file.
+
+# qBittorrent configuration
+qbittorrent:
+  # Web UI port
+  webUIPort: 8080
+
+  # BitTorrent listening port (for peer connections)
+  btPort: 6881
+
+  # Authentication
+  auth:
+    username: admin
+    password: password1995
+
+  # Download categories with paths
+  # These will be configured in qBittorrent for automatic download routing
+  categories:
+    movies:
+      enabled: true
+      savePath: /downloads/Movies
+    tv:
+      enabled: true
+      savePath: /downloads/TV
+    other:
+      enabled: true
+      savePath: /downloads/Other
+
+  # Additional qBittorrent settings
+  settings:
+    # Maximum number of connections
+    maxConnections: 500
+    # Maximum number of uploads
+    maxUploads: 20
+    # Upload limit (KiB/s, 0 = unlimited)
+    uploadLimit: 0
+    # Download limit (KiB/s, 0 = unlimited)
+    downloadLimit: 0
+    # Enable DHT
+    dht: true
+    # Enable PEX
+    pex: true
+    # Enable LSD
+    lsd: true
+
+# Image configuration
+image:
+  repository: linuxserver/qbittorrent
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion
+  tag: "5.0.1"
+
+# Image pull secrets (if using private registry)
+imagePullSecrets: []
+
+# Service account configuration
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1000
+
+# Container security context
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+
+# Service configuration
+service:
+  type: ClusterIP
+  webUIPort: 8080
+  # BitTorrent port uses hostPort in deployment, not exposed via service
+
+# Storage configuration
+storage:
+  # Downloads volume (shared with Flood)
+  downloads:
+    enabled: true
+    type: hostPath
+    hostPath:
+      path: /mnt/media/Plex
+      type: Directory
+    mountPath: /downloads
+
+  # qBittorrent config volume
+  config:
+    enabled: true
+    type: hostPath
+    hostPath:
+      path: /opt/stack/qbittorrent
+      type: DirectoryOrCreate
+    mountPath: /config
+
+# Environment variables for linuxserver image
+env:
+  # Timezone
+  TZ: UTC
+  # PUID (User ID)
+  PUID: "1000"
+  # PGID (Group ID)
+  PGID: "1000"
+  # Web UI port
+  WEBUI_PORT: "8080"
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity: {}
+
+# Liveness probe
+livenessProbe:
+  httpGet:
+    path: /
+    port: webui
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+# Readiness probe
+readinessProbe:
+  httpGet:
+    path: /
+    port: webui
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3

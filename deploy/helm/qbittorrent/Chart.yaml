@@ -1,0 +1,17 @@
+apiVersion: v2
+name: qbittorrent
+description: qBittorrent - A BitTorrent client in Qt with web interface
+type: application
+version: 5.0.1
+appVersion: "5.0.1"
+keywords:
+  - torrent
+  - bittorrent
+  - webui
+  - download
+home: https://www.qbittorrent.org
+sources:
+  - https://github.com/qbittorrent/qBittorrent
+  - https://github.com/linuxserver/docker-qbittorrent
+maintainers:
+  - name: glarov95

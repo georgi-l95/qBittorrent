@@ -1,0 +1,80 @@
+🎉 qBittorrent has been deployed successfully!
+
+📦 Release Information:
+   Name:      {{ .Release.Name }}
+   Namespace: {{ .Release.Namespace }}
+   Version:   {{ .Chart.AppVersion }}
+
+🌐 Access Information:
+   Internal Service: {{ include "qbittorrent.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.webUIPort }}
+
+   To access qBittorrent Web UI via port-forward:
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "qbittorrent.fullname" . }} {{ .Values.qbittorrent.webUIPort }}:{{ .Values.service.webUIPort }}
+   Then open: http://localhost:{{ .Values.qbittorrent.webUIPort }}
+
+🔐 Login Credentials:
+   Username: {{ .Values.qbittorrent.auth.username }}
+   Password: {{ .Values.qbittorrent.auth.password }}
+
+   ⚠️  IMPORTANT: Change the default password immediately after first login!
+      Go to: Tools → Options → Web UI → Authentication
+
+📁 Storage Configuration:
+{{- if .Values.storage.downloads.enabled }}
+   Downloads: {{ .Values.storage.downloads.mountPath }} ({{ .Values.storage.downloads.type }})
+{{- end }}
+{{- if .Values.storage.config.enabled }}
+   Config:    {{ .Values.storage.config.mountPath }} ({{ .Values.storage.config.type }})
+{{- end }}
+
+📂 Download Categories (Pre-configured):
+{{- if .Values.qbittorrent.categories.movies.enabled }}
+   • movies → {{ .Values.qbittorrent.categories.movies.savePath }}
+{{- end }}
+{{- if .Values.qbittorrent.categories.tv.enabled }}
+   • tv     → {{ .Values.qbittorrent.categories.tv.savePath }}
+{{- end }}
+{{- if .Values.qbittorrent.categories.other.enabled }}
+   • other  → {{ .Values.qbittorrent.categories.other.savePath }}
+{{- end }}
+
+🔌 BitTorrent Port:
+   Port {{ .Values.qbittorrent.btPort }} (TCP/UDP) is bound to host via hostPort
+   For better connectivity, forward this port on your router:
+   External: {{ .Values.qbittorrent.btPort }} → Internal: <your-server-ip>:{{ .Values.qbittorrent.btPort }}
+
+🔍 Check Status:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "qbittorrent.name" . }}
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "qbittorrent.name" . }} -f
+
+🌊 Connecting to Flood:
+   1. Navigate to Flood UI: https://flood.hederium.com
+   2. Go to Settings → Client Connection
+   3. Configure:
+      Client Type: qBittorrent
+      Host: {{ include "qbittorrent.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+      Port: {{ .Values.service.webUIPort }}
+      Username: {{ .Values.qbittorrent.auth.username }}
+      Password: {{ .Values.qbittorrent.auth.password }}
+   4. Click "Connect"
+
+📝 Setting Up Categories (in qBittorrent Web UI):
+   1. Right-click in torrent list → Categories → Add category
+   2. Create categories:
+      - Name: movies, Save path: /downloads/Movies
+      - Name: tv, Save path: /downloads/TV
+      - Name: other, Save path: /downloads/Other
+   3. When adding torrents, select the appropriate category
+
+💡 Tips:
+   - Categories auto-route downloads to correct folders
+   - Use Flood UI for better torrent management
+   - Change default password for security
+   - Configure router port forwarding for port {{ .Values.qbittorrent.btPort }}
+
+📖 Documentation:
+   - Deployment Guide: ./deploy/README.md
+   - qBittorrent Wiki: https://github.com/qbittorrent/qBittorrent/wiki
+   - Flood Docs: https://github.com/jesec/flood/wiki
+
+Happy torrenting! 🚀

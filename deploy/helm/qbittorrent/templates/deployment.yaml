@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "qbittorrent.fullname" . }}
+  labels:
+    {{- include "qbittorrent.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # Use Recreate for hostPath volumes and hostPort
+  selector:
+    matchLabels:
+      {{- include "qbittorrent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "qbittorrent.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "qbittorrent.serviceAccountName" . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: qbittorrent
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: webui
+              containerPort: {{ .Values.qbittorrent.webUIPort }}
+              protocol: TCP
+            - name: bt-tcp
+              containerPort: {{ .Values.qbittorrent.btPort }}
+              protocol: TCP
+              hostPort: {{ .Values.qbittorrent.btPort }}
+            - name: bt-udp
+              containerPort: {{ .Values.qbittorrent.btPort }}
+              protocol: UDP
+              hostPort: {{ .Values.qbittorrent.btPort }}
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.storage.downloads.enabled }}
+            - name: downloads
+              mountPath: {{ .Values.storage.downloads.mountPath }}
+            {{- end }}
+            {{- if .Values.storage.config.enabled }}
+            - name: config
+              mountPath: {{ .Values.storage.config.mountPath }}
+            {{- end }}
+      volumes:
+        {{- if .Values.storage.downloads.enabled }}
+        - name: downloads
+          {{- if eq .Values.storage.downloads.type "hostPath" }}
+          hostPath:
+            path: {{ .Values.storage.downloads.hostPath.path }}
+            type: {{ .Values.storage.downloads.hostPath.type }}
+          {{- else if eq .Values.storage.downloads.type "pvc" }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.downloads.pvc.claimName }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.storage.config.enabled }}
+        - name: config
+          {{- if eq .Values.storage.config.type "hostPath" }}
+          hostPath:
+            path: {{ .Values.storage.config.hostPath.path }}
+            type: {{ .Values.storage.config.hostPath.type }}
+          {{- else if eq .Values.storage.config.type "pvc" }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.config.pvc.claimName }}
+          {{- end }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
