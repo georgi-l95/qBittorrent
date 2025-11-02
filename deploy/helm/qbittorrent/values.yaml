@@ -64,14 +64,12 @@ serviceAccount:
 podAnnotations: {}
 
 # Pod security context
-podSecurityContext:
-  fsGroup: 1000
+# Note: linuxserver images need to run init scripts as root, then drop to PUID/PGID
+podSecurityContext: {}
 
 # Container security context
-securityContext:
-  runAsUser: 1000
-  runAsGroup: 1000
-  runAsNonRoot: true
+# Note: Empty to allow linuxserver image to manage permissions via PUID/PGID
+securityContext: {}
 
 # Service configuration
 service:
