@@ -4,7 +4,7 @@
 # qBittorrent configuration
 qbittorrent:
   # Web UI port
-  webUIPort: 8080
+  webUIPort: 9080
 
   # BitTorrent listening port (for peer connections)
   btPort: 6881
@@ -74,7 +74,7 @@ securityContext: {}
 # Service configuration
 service:
   type: ClusterIP
-  webUIPort: 8080
+  webUIPort: 9080
   # BitTorrent port uses hostPort in deployment, not exposed via service
 
 # Storage configuration
@@ -106,7 +106,7 @@ env:
   # PGID (Group ID)
   PGID: "1000"
   # Web UI port
-  WEBUI_PORT: "8080"
+  WEBUI_PORT: "9080"
 
 # Resource limits and requests
 resources:

@@ -40,6 +40,7 @@ spec:
             - name: webui
               containerPort: {{ .Values.qbittorrent.webUIPort }}
               protocol: TCP
+              hostPort: {{ .Values.qbittorrent.webUIPort }}
             - name: bt-tcp
               containerPort: {{ .Values.qbittorrent.btPort }}
               protocol: TCP
