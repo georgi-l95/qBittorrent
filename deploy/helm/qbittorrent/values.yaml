@@ -95,7 +95,7 @@ storage:
     enabled: true
     type: hostPath
     hostPath:
-      path: /opt/stack/qbittorrent
+      path: /opt/stacks/qbittorrent
       type: DirectoryOrCreate
     mountPath: /config
 
